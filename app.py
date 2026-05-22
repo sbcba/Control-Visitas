@@ -10,7 +10,7 @@ import holidays
 # 1. Configuración de la página
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS AVANZADO (Corrección definitiva de leyendas e inputs)
+# 2. INYECCIÓN DE CSS AVANZADO (Estética Conhecta, Alto Contraste y Ocultación del Uploader Nativo)
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
@@ -20,7 +20,7 @@ st.markdown("""
             font-family: 'Montserrat', sans-serif !important;
         }
         
-        /* Imagen de fondo de Conhecta */
+        /* Imagen de fondo institucional de Conhecta */
         .stApp {
             background-image: url('https://www.conhecta.com.ar/static/media/Medicos.181e2e2026ed6ef17823.jpg');
             background-size: cover;
@@ -39,14 +39,13 @@ st.markdown("""
             backdrop-filter: blur(6px);
         }
 
-        /* Barra lateral FIJA a la izquierda */
+        /* Personalización de la barra lateral FIJA a la izquierda */
         [data-testid="stSidebar"] {
             background-color: rgba(11, 37, 69, 0.98) !important;
             box-shadow: 4px 0 15px rgba(0,0,0,0.2);
             backdrop-filter: blur(4px);
         }
         
-        /* Ocultar elementos nativos innecesarios o rotos */
         [data-testid="stSidebarCollapseButton"] {
             display: none !important;
         }
@@ -108,7 +107,7 @@ st.markdown("""
             margin-bottom: 1rem;
         }
         
-        /* CORRECCIÓN FINAL PARA LA CAJA DE UPLOAD Y SU LEYENDA */
+        /* RECONSTRUCCIÓN ESTÁTICA TOTAL DEL BOTÓN DE UPLOAD (OCULTA EL DE STREAMLIT Y CREA EL NUESTRO) */
         [data-testid="stFileUploader"] {
             background-color: #ffffff !important;
             border: 2px dashed #00bcbc !important;
@@ -117,31 +116,28 @@ st.markdown("""
             box-shadow: 0 4px 12px rgba(0, 188, 188, 0.05) !important;
             text-align: center !important;
         }
-        
-        /* Ocultar SOLAMENTE el texto secundario nativo molesto de arrastre, no el del botón */
-        [data-testid="stFileUploader"] section > data,
-        [data-testid="stFileUploader"] section > div > p,
-        [data-testid="stFileUploader"] svg {
+        /* Ocultar el botón nativo desalineado y todos sus textos cruzados en inglés */
+        [data-testid="stFileUploader"] section {
             display: none !important;
         }
-        
-        /* Forzar visibilidad, color y tamaño del texto propio del botón de examinar */
-        [data-testid="stFileUploader"] button {
-            border-radius: 20px !important;
-            border: 2px solid #00bcbc !important;
-            color: #0b2545 !important; /* Forzamos color oscuro legible */
-            background-color: #f7f9fa !important;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            padding: 0.5rem 2rem !important;
-            display: inline-block !important;
-            margin: 10px auto !important;
-            opacity: 1 !important;
-            visibility: visible !important;
+        /* Inyectar un diseño personalizado simulado encima del botón real oculto */
+        [data-testid="stFileUploader"]::after {
+            content: "Seleccionar Reporte Mensual (.xlsx / .csv)";
+            display: inline-block;
+            background-color: #f7f9fa;
+            color: #0b2545;
+            border: 2px solid #00bcbc;
+            border-radius: 20px;
+            padding: 0.5rem 2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s ease;
         }
-        [data-testid="stFileUploader"] button * {
-            color: #0b2545 !important; /* Asegura que el texto interno cambie */
-            font-size: 0.95rem !important;
+        [data-testid="stFileUploader"]:hover::after {
+            background-color: #00bcbc;
+            color: white;
         }
         [data-testid="stFileUploader"] label p {
             color: #0b2545 !important;
@@ -275,7 +271,8 @@ if uploaded_file is not None:
                     
                     if tipo_prof == "Enfermero Guardia":
                         if not pd.isna(minutos) and minutos > 0:
-                            horas_totales = round((minutos / 60.0) * 2) / 2
+                            # CORREGIDO: Redondeo comercial a horas completas fijas (sin medias horas)
+                            horas_totales = float(round(minutos / 60.0))
                             
                             if toca_feriado:
                                 if start.date() == end.date():
@@ -290,7 +287,8 @@ if uploaded_file is not None:
                                     if start.date() in ar_holidays: min_feriado += min_dia1
                                     if end.date() in ar_holidays: min_feriado += min_dia2
                                         
-                                    horas_feriado = round((min_feriado / 60.0) * 2) / 2
+                                    # CORREGIDO: Redondeo de horas feriadas también a enteros completos
+                                    horas_feriado = float(round(min_feriado / 60.0))
                     else:
                         if es_feriado_visita == "SÍ":
                             visitas_feriado = 1
@@ -323,10 +321,10 @@ if uploaded_file is not None:
                         'Horas Feriado Guardia': 'sum'
                     }).reset_index()
                     
+                    # Formato amigable de horas enteras para la grilla web
                     def format_horas_texto(val):
                         if val == 0: return "-"
-                        if val % 1 == 0: return f"{int(val)} hs"
-                        return f"{int(val)} hs y media"
+                        return f"{int(val)} hs"
                     
                     summary_view = summary.copy()
                     summary_view['Horas Totales Guardia'] = summary_view['Horas Totales Guardia'].apply(format_horas_texto)
@@ -335,7 +333,7 @@ if uploaded_file is not None:
                     st.markdown('<div class="titulo-seccion">📊 Consolidado de Liquidación Mensual</div>', unsafe_allow_html=True)
                     st.dataframe(summary_view, use_container_width=True)
                     
-                    # GENERACIÓN DEL EXCEL CORPORATIVO
+                    # 5. GENERACIÓN DEL EXCEL SIN PINTAR FILAS NI CELDAS
                     output = io.BytesIO()
                     wb = openpyxl.Workbook()
                     ws = wb.active
@@ -344,11 +342,11 @@ if uploaded_file is not None:
                     
                     header_fill = PatternFill(start_color="0B2545", end_color="0B2545", fill_type="solid")
                     header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
-                    zebra_fill = PatternFill(start_color="F7F9FA", end_color="F7F9FA", fill_type="solid")
-                    white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-                    feriado_alerta_fill = PatternFill(start_color="E0F2F1", end_color="E0F2F1", fill_type="solid")
                     
-                    thin_side = Side(style='thin', color='E0E0E0')
+                    # CORREGIDO: Todo el reporte sale con fondo blanco puro sin pintar feriados ni zebra
+                    white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+                    
+                    thin_side = Side(style='thin', color='D3D3D3')
                     thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
                     
                     ws['A1'] = "Reporte de Control Prestacional y Liquidación"
@@ -384,23 +382,19 @@ if uploaded_file is not None:
                         v_com.number_format = '#,##0'
                         v_fer.number_format = '#,##0'
                         
-                        h_tot = ws.cell(row=r_idx, column=8, value=float(row['Horas Totales Guardia']))
-                        h_fer = ws.cell(row=r_idx, column=9, value=float(row['Horas Feriado Guardia']))
-                        h_tot.number_format = '#,##0.0'
-                        h_fer.number_format = '#,##0.0'
+                        # CORREGIDO: Las horas se guardan como enteros en el Excel
+                        h_tot = ws.cell(row=r_idx, column=8, value=int(row['Horas Totales Guardia']))
+                        h_fer = ws.cell(row=r_idx, column=9, value=int(row['Horas Feriado Guardia']))
+                        h_tot.number_format = '#,##0'
+                        h_fer.number_format = '#,##0'
                         
                         for c_num in [6, 7, 8, 9]:
                             ws.cell(row=r_idx, column=c_num).alignment = Alignment(horizontal="right")
-                        
-                        if row['Visitas Feriado'] > 0 or row['Horas Feriado Guardia'] > 0:
-                            row_fill = feriado_alerta_fill
-                        else:
-                            row_fill = zebra_fill if idx % 2 == 0 else white_fill
                             
                         for c_idx in range(1, 10):
                             cell = ws.cell(row=r_idx, column=c_idx)
                             cell.font = Font(name="Arial", size=9)
-                            cell.fill = row_fill
+                            cell.fill = white_fill # Fila completamente blanca
                             cell.border = thin_border
                             
                         ws.row_dimensions[r_idx].height = 18
@@ -417,10 +411,7 @@ if uploaded_file is not None:
                         res_cell = ws.cell(row=tot_row, column=c_idx_f, value=f"=SUM({col_let}5:{col_let}{tot_row-1})")
                         res_cell.font = Font(name="Arial", size=9, bold=True, color="0B2545")
                         res_cell.border = thin_border
-                        if col_let in ['H', 'I']:
-                            res_cell.number_format = '#,##0.0'
-                        else:
-                            res_cell.number_format = '#,##0'
+                        res_cell.number_format = '#,##0'
                     
                     ws.freeze_panes = "A5"
                     
