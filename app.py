@@ -215,7 +215,7 @@ if 'filtros_aplicados' not in st.session_state:
 
 # Listas maestras estables de opciones basadas en los reportes del sistema
 MODULOS_SISTEMA = ["AO", "KETO", "SND", "BOMBA", "CONCENTRADOR", "CILINDRO", "PEDIATRICO", "COMPLEJO", "AE", "AP", "SI", "CP", "CD", "DI", "CEAO"]
-PROFESIONALES_SISTEMA = ["Enfermero", "Enfermero Guardia", "Kinesiólogo", "Nutricionista", "Médico", "Fonoaudiólogo", "Terapista Ocupacional", "Psicólogo"]
+PROFESIONALES_SISTEMA = ["Enfermero", "Enfermero Guardia", "Kinesiólogo", "Nutricionista", "Medico", "Fonoaudiólogo", "Terapista Ocupacional", "Psicólogo"]
 
 # 4. BARRA LATERAL IZQUIERDA FIJA - CRITERIOS EN BLANCO
 st.sidebar.markdown("## 🔍 Criterios de Selección")
