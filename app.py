@@ -7,92 +7,160 @@ import io
 import datetime
 import holidays
 
-# 1. Configuración de la página web (Forzamos tema claro y diseño ancho)
+# 1. Configuración de la página (Forzar tema claro y diseño ancho)
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS PERSONALIZADO (Estilo Conhecta)
+# 2. INYECCIÓN DE CSS AVANZADO (Réplica exacta de la estética Conhecta)
 st.markdown("""
     <style>
-        /* Importar tipografía moderna */
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
+        /* Aplicar tipografía global */
         * {
             font-family: 'Montserrat', sans-serif !important;
         }
         
-        # .stApp {
-            background-color: #FFFFFF;
+        /* Imagen de fondo institucional de Conhecta en toda la app */
+        .stApp {
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop'); /* Textura abstracta fluida en tonos verde/azul */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
         
-        /* Personalización de la barra lateral (Sidebar) */
+        /* Capa de legibilidad para el contenido central */
+        .block-container {
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 2.5rem !important;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(11, 37, 69, 0.08);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Barra lateral (Sidebar) con el Azul Marino Conhecta */
         [data-testid="stSidebar"] {
-            background-color: #134074 !important; /* Azul marino Conhecta */
-            color: #FFFFFF !important;
+            background-color: #0b2545 !important;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         }
-        [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label {
+        [data-testid="stSidebar"] h2, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label {
             color: #FFFFFF !important;
+            font-weight: 500;
         }
         
-        /* Encabezados principales estilo Banner */
-        .conhecta-header {
-            background: linear-gradient(135deg, #134074 0%, #00A896 100%);
+        /* Contenedores de selección múltiple (cajas de texto/inputs) en el Sidebar */
+        span[data-baseweb="tag"] {
+            background-color: #00BFA5 !important; /* El turquesa vivo de Conhecta */
+            color: white !important;
+            border-radius: 6px !important;
+        }
+        div[data-baseline="none"] {
+            border-radius: 8px !important;
+        }
+        
+        /* Banner de Cabecera Estilo Conhecta */
+        .conhecta-banner {
+            background: linear-gradient(135deg, #0b2545 0%, #00bcbc 100%);
             padding: 2.5rem;
             border-radius: 12px;
             color: white;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0,168,150,0.2);
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 188, 188, 0.25);
         }
-        .conhecta-header h1 {
+        .conhecta-banner h1 {
             color: white !important;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            margin: 0;
+        }
+        .conhecta-banner p {
+            color: #e0f2f1 !important;
+            margin-top: 0.5rem;
+            font-size: 1.05rem;
+            opacity: 0.9;
         }
         
-        /* Botones personalizados con el Turquesa Conhecta */
-        div.stButton > button:first-child {
-            background-color: #00A896 !important;
+        /* REDISEÑO COMPLETO DE LA CAJA DE UPLOAD (File Uploader) */
+        [data-testid="stFileUploader"] {
+            background-color: #ffffff !important;
+            border: 2px dashed #00bcbc !important;
+            border-radius: 12px !important;
+            padding: 1.5rem !important;
+            box-shadow: 0 4px 12px rgba(0, 188, 188, 0.05) !important;
+            transition: all 0.3s ease;
+        }
+        [data-testid="stFileUploader"]:hover {
+            border-color: #0b2545 !important;
+            box-shadow: 0 6px 18px rgba(11, 37, 69, 0.1) !important;
+        }
+        [data-testid="stFileUploader"] section {
+            background-color: transparent !important;
+            border: none !important;
+        }
+        [data-testid="stFileUploader"] label {
+            color: #0b2545 !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            margin-bottom: 0.8rem;
+        }
+        
+        /* Botón de envío de formulario (Aceptar filtros) */
+        button[data-testid="stFormSubmitButton"] {
+            background-color: #00bcbc !important;
             color: white !important;
             border-radius: 25px !important;
             border: none !important;
-            padding: 0.6rem 2rem !important;
             font-weight: 600 !important;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 168, 150, 0.3);
+            padding: 0.5rem 2rem !important;
+            width: 100% !important;
+            box-shadow: 0 4px 12px rgba(0, 188, 188, 0.2);
+            transition: all 0.2s ease;
         }
-        div.stButton > button:first-child:hover {
-            background-color: #008f7f !important;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0, 168, 150, 0.4);
-        }
-        
-        /* Botón del formulario específico */
-        button[data-testid="stFormSubmitButton"] {
-            background-color: #00A896 !important;
-            color: white !important;
-            width: 100%;
+        button[data-testid="stFormSubmitButton"]:hover {
+            background-color: #0b2545 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(11, 37, 69, 0.3);
         }
 
-        /* Estilo para las alertas e info */
+        /* Botón de Descarga del Excel */
+        div.stDownloadButton > button {
+            background: linear-gradient(135deg, #00bcbc 0%, #0b2545 100%) !important;
+            color: white !important;
+            border-radius: 25px !important;
+            border: none !important;
+            padding: 0.75rem 2.5rem !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(0, 188, 188, 0.3) !important;
+        }
+        div.stDownloadButton > button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 188, 188, 0.4) !important;
+        }
+
+        /* Tarjeta informativa (Alertas) */
         .stAlert {
-            border-radius: 10px !important;
-            border-left: 5px solid #00A896 !important;
+            background-color: #f7f9fa !important;
+            border-radius: 12px !important;
+            border-left: 6px solid #00bcbc !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. BANNER PRINCIPAL (Simulando la cabecera de Conhecta)
+# 3. CABECERA INSTITUCIONAL CON ESTILO CONHECTA
 st.markdown("""
-    <div class="conhecta-header">
+    <div class="conhecta-banner">
         <h1>🧬 Portal de Auditoría Asistencial</h1>
-        <p>Plataforma inteligente para el control mensual de prestaciones, liquidación de guardias y reportería de feriados.</p>
+        <p>Gestión inteligente de módulos prestacionales, control de guardias y liquidación automatizada de feriados nacionales.</p>
     </div>
 """, unsafe_allow_html=True)
 
 if 'filtros_aplicados' not in st.session_state:
     st.session_state.filtros_aplicados = False
 
-# Área de carga del archivo institucional
-uploaded_file = st.file_uploader("📂 Arrastrá o seleccioná el archivo consolidado mensual (Excel o CSV)", type=["xlsx", "csv"])
+# Área de carga del archivo (Ahora se ve limpia, blanca y con bordes turquesas redondeados)
+uploaded_file = st.file_uploader("📂 Cargá el reporte mensual completo del sistema asistencial", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
     try:
@@ -103,7 +171,7 @@ if uploaded_file is not None:
             
         columnas_requeridas = ['EstadoCoordinacion', 'TipoModulo', 'TipoProfesional', 'Profesional', 'Paciente', 'PlanCuidado', 'FechaInicioProF', 'FechaFinProf', 'DuracionMinutosProf']
         if not all(col in df.columns for col in columnas_requeridas):
-            st.error("⚠️ El archivo no cuenta con la estructura requerida. Por favor, verificá las columnas del reporte.")
+            st.error("⚠️ Estructura incorrecta. Asegurate de subir el reporte de visitas completo con los encabezados originales del sistema.")
         else:
             df_base = df[df['EstadoCoordinacion'] == 'Liberada'].copy()
             
@@ -112,23 +180,23 @@ if uploaded_file is not None:
             
             ar_holidays = holidays.Argentina()
             
-            # SIDEBAR ESTILIZADO CON FORMULARIO
-            st.sidebar.markdown("## 🔍 Filtros Operativos")
+            # SIDEBAR CON FORMULARIO (Diseño integrado en la barra oscura)
+            st.sidebar.markdown("## 🔍 Criterios de Selección")
             
             modulos_disponibles = sorted(list(df_base['TipoModulo'].dropna().unique()))
             profesionales_disponibles = sorted(list(df_base['TipoProfesional'].dropna().unique()))
             default_prof = [p for p in profesionales_disponibles if p != 'Medico']
 
             with st.sidebar.form(key='formulario_filtros'):
-                modulos_seleccionados = st.multiselect("Filtrar por Módulo:", modulos_disponibles, default=modulos_disponibles)
-                profesionales_seleccionados = st.multiselect("Filtrar por Especialidad:", profesionales_disponibles, default=default_prof)
+                modulos_seleccionados = st.multiselect("Tipos de Módulo:", modulos_disponibles, default=modulos_disponibles)
+                profesionales_seleccionados = st.multiselect("Especialidades a Auditar:", profesionales_disponibles, default=default_prof)
                 
-                boton_aceptar = st.form_submit_button(label="Aplicar Filtros")
+                boton_aceptar = st.form_submit_button(label="Aplicar Filtros Operativos")
                 if boton_aceptar:
                     st.session_state.filtros_aplicados = True
             
             if not st.session_state.filtros_aplicados:
-                st.info("💡 **Sistema listo para procesar:** Seleccioná las especialidades y módulos en el panel izquierdo y presioná **'Aplicar Filtros'** para generar la liquidación.")
+                st.info("💡 **Procesador Activo:** Para visualizar el consolidado en pantalla y habilitar la descarga, seleccioná las opciones en el panel de la izquierda y presioná **'Aplicar Filtros Operativos'**.")
             else:
                 df_filtered = df_base[
                     df_base['TipoModulo'].isin(modulos_seleccionados) & 
@@ -198,7 +266,7 @@ if uploaded_file is not None:
                     })
                     
                 if len(Rows_Auditoria) == 0:
-                    st.warning("No se encontraron registros activos para la combinación de filtros seleccionada.")
+                    st.warning("No se encontraron registros bajo los criterios seleccionados.")
                 else:
                     df_audit = pd.DataFrame(Rows_Auditoria)
                     
@@ -220,28 +288,28 @@ if uploaded_file is not None:
                     summary_view['Horas Totales Guardia'] = summary_view['Horas Totales Guardia'].apply(format_horas_texto)
                     summary_view['Horas Feriado Guardia'] = summary_view['Horas Feriado Guardia'].apply(format_horas_texto)
                     
-                    st.markdown(f"### 📊 Consolidado de Auditoría Realizado")
+                    st.markdown(f"### 📊 Consolidado de Liquidación Mensual")
                     st.dataframe(summary_view, use_container_width=True)
                     
-                    # GENERACIÓN DE EXCEL (Usamos la misma paleta Conhecta en el archivo exportado)
+                    # CONFIGURACIÓN DEL EXCEL EXPORTADO CON COLORES COHERENTES
                     output = io.BytesIO()
                     wb = openpyxl.Workbook()
                     ws = wb.active
-                    ws.title = "Auditoría Conhecta"
+                    ws.title = "Auditoría Visitas"
                     ws.views.sheetView[0].showGridLines = True
                     
-                    header_fill = PatternFill(start_color="134074", end_color="134074", fill_type="solid") # Azul Marino Conhecta
+                    header_fill = PatternFill(start_color="0B2545", end_color="0B2545", fill_type="solid") # Azul Conhecta
                     header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
                     zebra_fill = PatternFill(start_color="F7F9FA", end_color="F7F9FA", fill_type="solid")
                     white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-                    feriado_alerta_fill = PatternFill(start_color="E0F2F1", end_color="E0F2F1", fill_type="solid") # Turquesa/Verde muy tenue en vez de amarillo
+                    feriado_alerta_fill = PatternFill(start_color="E0F2F1", end_color="E0F2F1", fill_type="solid") # Fondo turquesa muy claro para feriados
                     
                     thin_side = Side(style='thin', color='E0E0E0')
                     thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
                     
-                    ws['A1'] = "Reporte Institucional de Auditoría de Módulos"
-                    ws['A1'].font = Font(name="Arial", size=14, bold=True, color="134074")
-                    ws['A2'] = f"Corte de información procesado bajo lineamientos de validación"
+                    ws['A1'] = "Reporte de Control Prestacional y Liquidación"
+                    ws['A1'].font = Font(name="Arial", size=14, bold=True, color="0B2545")
+                    ws['A2'] = f"Análisis automatizado bajo reglas de negocio Conhecta"
                     ws['A2'].font = Font(name="Arial", size=9, italic=True, color="555555")
                     
                     headers = [
@@ -294,7 +362,7 @@ if uploaded_file is not None:
                         ws.row_dimensions[r_idx].height = 18
                     
                     tot_row = start_row + len(summary)
-                    ws.cell(row=tot_row, column=1, value="Total General").font = Font(name="Arial", size=9, bold=True, color="134074")
+                    ws.cell(row=tot_row, column=1, value="Total General").font = Font(name="Arial", size=9, bold=True, color="0B2545")
                     ws.cell(row=tot_row, column=1).border = thin_border
                     for c_empty in range(2, 6):
                         ws.cell(row=tot_row, column=c_empty).border = thin_border
@@ -303,7 +371,7 @@ if uploaded_file is not None:
                     for col_let in col_letters:
                         c_idx_f = headers.index(headers[5 + col_letters.index(col_let)]) + 1
                         res_cell = ws.cell(row=tot_row, column=c_idx_f, value=f"=SUM({col_let}5:{col_let}{tot_row-1})")
-                        res_cell.font = Font(name="Arial", size=9, bold=True, color="134074")
+                        res_cell.font = Font(name="Arial", size=9, bold=True, color="0B2545")
                         res_cell.border = thin_border
                         if col_let in ['H', 'I']:
                             res_cell.number_format = '#,##0.0'
@@ -332,4 +400,4 @@ if uploaded_file is not None:
                     )
                 
     except Exception as e:
-        st.error(f"Error en el procesamiento de columnas: {e}")
+        st.error(f"Error general de procesamiento: {e}")
