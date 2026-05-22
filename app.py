@@ -7,10 +7,10 @@ import io
 import datetime
 import holidays
 
-# 1. Configuración de la página (Forzar tema claro y diseño ancho)
+# 1. Configuración de la página
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS AVANZADO (Réplica exacta de la estética Conhecta)
+# 2. INYECCIÓN DE CSS AVANZADO (Contraste Máximo y Estética Conhecta)
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
@@ -22,7 +22,7 @@ st.markdown("""
         
         /* Imagen de fondo institucional de Conhecta en toda la app */
         .stApp {
-            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop'); /* Textura abstracta fluida en tonos verde/azul */
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -30,33 +30,18 @@ st.markdown("""
         
         /* Capa de legibilidad para el contenido central */
         .block-container {
-            background-color: rgba(255, 255, 255, 0.92);
+            background-color: rgba(255, 255, 255, 0.94);
             padding: 2.5rem !important;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(11, 37, 69, 0.08);
+            box-shadow: 0 8px 32px rgba(11, 37, 69, 0.12);
             margin-top: 2rem;
             margin-bottom: 2rem;
             backdrop-filter: blur(8px);
         }
 
-        /* Barra lateral (Sidebar) con el Azul Marino Conhecta */
+        /* Ocultar barra lateral por completo para centrar la experiencia */
         [data-testid="stSidebar"] {
-            background-color: #0b2545 !important;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-        }
-        [data-testid="stSidebar"] h2, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label {
-            color: #FFFFFF !important;
-            font-weight: 500;
-        }
-        
-        /* Contenedores de selección múltiple (cajas de texto/inputs) en el Sidebar */
-        span[data-baseweb="tag"] {
-            background-color: #00BFA5 !important; /* El turquesa vivo de Conhecta */
-            color: white !important;
-            border-radius: 6px !important;
-        }
-        div[data-baseline="none"] {
-            border-radius: 8px !important;
+            display: none !important;
         }
         
         /* Banner de Cabecera Estilo Conhecta */
@@ -65,7 +50,7 @@ st.markdown("""
             padding: 2.5rem;
             border-radius: 12px;
             color: white;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             box-shadow: 0 4px 20px rgba(0, 188, 188, 0.25);
         }
         .conhecta-banner h1 {
@@ -78,10 +63,46 @@ st.markdown("""
             color: #e0f2f1 !important;
             margin-top: 0.5rem;
             font-size: 1.05rem;
-            opacity: 0.9;
+            font-weight: 500;
         }
         
-        /* REDISEÑO COMPLETO DE LA CAJA DE UPLOAD (File Uploader) */
+        /* Títulos de sección con alto contraste (Azul Marino Profundo) */
+        .titulo-seccion {
+            color: #0b2545 !important;
+            font-weight: 700 !important;
+            font-size: 1.4rem !important;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* DISEÑO DE LAS CAJAS DE TEXTO / INPUTS (Alto Contraste) */
+        label[data-testid="stWidgetLabel"] p {
+            color: #0b2545 !important; /* Texto del label en azul oscuro */
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+        }
+        div[data-baseweb="select"] {
+            background-color: #ffffff !important;
+            border: 2px solid #00bcbc !important;
+            border-radius: 8px !important;
+        }
+        /* Color del texto interno de los selectores */
+        div[data-baseweb="select"] div {
+            color: #0b2545 !important;
+            font-weight: 500 !important;
+        }
+        /* Píldoras de selección (Tags) */
+        span[data-baseweb="tag"] {
+            background-color: #00bcbc !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 600 !important;
+        }
+        
+        /* DISEÑO DE LA CAJA DE UPLOAD (File Uploader) */
         [data-testid="stFileUploader"] {
             background-color: #ffffff !important;
             border: 2px dashed #00bcbc !important;
@@ -94,25 +115,21 @@ st.markdown("""
             border-color: #0b2545 !important;
             box-shadow: 0 6px 18px rgba(11, 37, 69, 0.1) !important;
         }
-        [data-testid="stFileUploader"] section {
-            background-color: transparent !important;
-            border: none !important;
-        }
-        [data-testid="stFileUploader"] label {
+        [data-testid="stFileUploader"] label p {
             color: #0b2545 !important;
             font-weight: 600 !important;
             font-size: 1.1rem !important;
-            margin-bottom: 0.8rem;
         }
         
-        /* Botón de envío de formulario (Aceptar filtros) */
+        /* Botón de envío de formulario (Aplicar filtros) */
         button[data-testid="stFormSubmitButton"] {
             background-color: #00bcbc !important;
             color: white !important;
             border-radius: 25px !important;
             border: none !important;
             font-weight: 600 !important;
-            padding: 0.5rem 2rem !important;
+            padding: 0.6rem 2.5rem !important;
+            margin-top: 1rem !important;
             width: 100% !important;
             box-shadow: 0 4px 12px rgba(0, 188, 188, 0.2);
             transition: all 0.2s ease;
@@ -138,12 +155,14 @@ st.markdown("""
             box-shadow: 0 6px 20px rgba(0, 188, 188, 0.4) !important;
         }
 
-        /* Tarjeta informativa (Alertas) */
-        .stAlert {
-            background-color: #f7f9fa !important;
+        /* Formulario contenedor de filtros */
+        form[key="formulario_filtros_fijos"] {
+            background-color: #ffffff !important;
+            padding: 1.5rem !important;
             border-radius: 12px !important;
-            border-left: 6px solid #00bcbc !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #e0e0e0 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+            margin-bottom: 2rem !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -156,11 +175,34 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
+# Inicializar estados de la aplicación
 if 'filtros_aplicados' not in st.session_state:
     st.session_state.filtros_aplicados = False
 
-# Área de carga del archivo (Ahora se ve limpia, blanca y con bordes turquesas redondeados)
-uploaded_file = st.file_uploader("📂 Cargá el reporte mensual completo del sistema asistencial", type=["xlsx", "csv"])
+# Módulos y Especialidades por defecto (basados en la estructura del sistema corporativo)
+MODULOS_PREDEFINIDOS = ["AO", "KETO", "SND", "BOMBA", "CONCENTRADOR", "CILINDRO", "PEDIATRICO", "COMPLEJO"]
+PROFESIONALES_PREDEFINIDOS = ["Enfermero", "Enfermero Guardia", "Kinesiólogo", "Nutricionista", "Médico", "Fonoaudiólogo"]
+DEFAULT_PROF = ["Enfermero", "Enfermero Guardia", "Kinesiólogo", "Nutricionista", "Fonoaudiólogo"]
+
+# 4. PANEL DE CRITERIOS FIJO AL INICIO (Dentro de un formulario de alto contraste)
+st.markdown('<div class="titulo-seccion">🔍 Criterios de Selección Previa</div>', unsafe_allow_html=True)
+
+with st.form(key='formulario_filtros_fijos'):
+    col1, col2 = st.columns(2)
+    with col1:
+        modulos_seleccionados = st.multiselect("Tipos de Módulo a incluir:", MODULOS_PREDEFINIDOS, default=MODULOS_PREDEFINIDOS)
+    with col2:
+        profesionales_seleccionados = st.multiselect("Especialidades a auditar:", PROFESIONALES_PREDEFINIDOS, default=DEFAULT_PROF)
+    
+    boton_aceptar = st.form_submit_button(label="✅ Confirmar Criterios y Aplicar Filtros")
+    if boton_aceptar:
+        st.session_state.filtros_aplicados = True
+
+st.markdown("---")
+
+# 5. ZONA DE CARGA DE ARCHIVOS
+st.markdown('<div class="titulo-seccion">📂 Carga de Datos Asistenciales</div>', unsafe_allow_html=True)
+uploaded_file = st.file_uploader("Arrastrá o seleccioná el reporte mensual completo (.xlsx o .csv)", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
     try:
@@ -173,31 +215,17 @@ if uploaded_file is not None:
         if not all(col in df.columns for col in columnas_requeridas):
             st.error("⚠️ Estructura incorrecta. Asegurate de subir el reporte de visitas completo con los encabezados originales del sistema.")
         else:
-            df_base = df[df['EstadoCoordinacion'] == 'Liberada'].copy()
-            
-            df_base['FechaInicioProF'] = pd.to_datetime(df_base['FechaInicioProF'], errors='coerce')
-            df_base['FechaFinProf'] = pd.to_datetime(df_base['FechaFinProf'], errors='coerce')
-            
-            ar_holidays = holidays.Argentina()
-            
-            # SIDEBAR CON FORMULARIO (Diseño integrado en la barra oscura)
-            st.sidebar.markdown("## 🔍 Criterios de Selección")
-            
-            modulos_disponibles = sorted(list(df_base['TipoModulo'].dropna().unique()))
-            profesionales_disponibles = sorted(list(df_base['TipoProfesional'].dropna().unique()))
-            default_prof = [p for p in profesionales_disponibles if p != 'Medico']
-
-            with st.sidebar.form(key='formulario_filtros'):
-                modulos_seleccionados = st.multiselect("Tipos de Módulo:", modulos_disponibles, default=modulos_disponibles)
-                profesionales_seleccionados = st.multiselect("Especialidades a Auditar:", profesionales_disponibles, default=default_prof)
-                
-                boton_aceptar = st.form_submit_button(label="Aplicar Filtros Operativos")
-                if boton_aceptar:
-                    st.session_state.filtros_aplicados = True
-            
             if not st.session_state.filtros_aplicados:
-                st.info("💡 **Procesador Activo:** Para visualizar el consolidado en pantalla y habilitar la descarga, seleccioná las opciones en el panel de la izquierda y presioná **'Aplicar Filtros Operativos'**.")
+                st.info("💡 **Criterios requeridos:** Definí los módulos y especialidades arriba y presioná **'Confirmar Criterios y Aplicar Filtros'** para procesar las visitas de este archivo.")
             else:
+                # Filtrado base: Solo visitas Liberadas
+                df_base = df[df['EstadoCoordinacion'] == 'Liberada'].copy()
+                df_base['FechaInicioProF'] = pd.to_datetime(df_base['FechaInicioProF'], errors='coerce')
+                df_base['FechaFinProf'] = pd.to_datetime(df_base['FechaFinProf'], errors='coerce')
+                
+                ar_holidays = holidays.Argentina()
+                
+                # Aplicar los filtros seleccionados en la parte fija
                 df_filtered = df_base[
                     df_base['TipoModulo'].isin(modulos_seleccionados) & 
                     df_base['TipoProfesional'].isin(profesionales_seleccionados)
@@ -288,21 +316,21 @@ if uploaded_file is not None:
                     summary_view['Horas Totales Guardia'] = summary_view['Horas Totales Guardia'].apply(format_horas_texto)
                     summary_view['Horas Feriado Guardia'] = summary_view['Horas Feriado Guardia'].apply(format_horas_texto)
                     
-                    st.markdown(f"### 📊 Consolidado de Liquidación Mensual")
+                    st.markdown('<div class="titulo-seccion">📊 Consolidado de Liquidación Mensual</div>', unsafe_allow_html=True)
                     st.dataframe(summary_view, use_container_width=True)
                     
-                    # CONFIGURACIÓN DEL EXCEL EXPORTADO CON COLORES COHERENTES
+                    # GENERACIÓN DE EXCEL CON ESTILO CORPORATIVO
                     output = io.BytesIO()
                     wb = openpyxl.Workbook()
                     ws = wb.active
                     ws.title = "Auditoría Visitas"
                     ws.views.sheetView[0].showGridLines = True
                     
-                    header_fill = PatternFill(start_color="0B2545", end_color="0B2545", fill_type="solid") # Azul Conhecta
+                    header_fill = PatternFill(start_color="0B2545", end_color="0B2545", fill_type="solid")
                     header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
                     zebra_fill = PatternFill(start_color="F7F9FA", end_color="F7F9FA", fill_type="solid")
                     white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-                    feriado_alerta_fill = PatternFill(start_color="E0F2F1", end_color="E0F2F1", fill_type="solid") # Fondo turquesa muy claro para feriados
+                    feriado_alerta_fill = PatternFill(start_color="E0F2F1", end_color="E0F2F1", fill_type="solid")
                     
                     thin_side = Side(style='thin', color='E0E0E0')
                     thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
