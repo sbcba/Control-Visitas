@@ -10,7 +10,7 @@ import holidays
 # 1. Configuración de la página
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS AVANZADO (Corrección definitiva del uploader y contraste premium)
+# 2. INYECCIÓN DE CSS AVANZADO (Corrección definitiva de leyendas e inputs)
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
@@ -20,7 +20,7 @@ st.markdown("""
             font-family: 'Montserrat', sans-serif !important;
         }
         
-        /* Imagen de fondo institucional de Conhecta */
+        /* Imagen de fondo de Conhecta */
         .stApp {
             background-image: url('https://www.conhecta.com.ar/static/media/Medicos.181e2e2026ed6ef17823.jpg');
             background-size: cover;
@@ -39,14 +39,14 @@ st.markdown("""
             backdrop-filter: blur(6px);
         }
 
-        /* Personalización de la barra lateral FIJA a la izquierda */
+        /* Barra lateral FIJA a la izquierda */
         [data-testid="stSidebar"] {
             background-color: rgba(11, 37, 69, 0.98) !important;
             box-shadow: 4px 0 15px rgba(0,0,0,0.2);
             backdrop-filter: blur(4px);
         }
         
-        /* Ocultar elementos corruptos de la interfaz nativa */
+        /* Ocultar elementos nativos innecesarios o rotos */
         [data-testid="stSidebarCollapseButton"] {
             display: none !important;
         }
@@ -55,7 +55,7 @@ st.markdown("""
             font-weight: 600 !important;
         }
         
-        /* Ajuste de los selectores múltiples dentro de la barra lateral (Alto Contraste) */
+        /* Ajuste de los selectores múltiples dentro de la barra lateral */
         div[data-baseweb="select"] {
             background-color: #ffffff !important;
             border: 2px solid #00bcbc !important;
@@ -65,10 +65,6 @@ st.markdown("""
             color: #0b2545 !important;
             font-weight: 600 !important;
         }
-        div[data-baseweb="select"] [aria-live="polite"] {
-            color: #ffffff !important; /* Placeholder invisible o blanco antes de desplegar */
-        }
-        /* Color del texto del buscador interno cuando escribís dentro del desplegable */
         div[data-baseweb="select"] input {
             color: #0b2545 !important;
         }
@@ -112,7 +108,7 @@ st.markdown("""
             margin-bottom: 1rem;
         }
         
-        /* SOLUCIÓN RADICAL PARA LA CAJA DE CARGA (Evita superposiciones de textos en inglés) */
+        /* CORRECCIÓN FINAL PARA LA CAJA DE UPLOAD Y SU LEYENDA */
         [data-testid="stFileUploader"] {
             background-color: #ffffff !important;
             border: 2px dashed #00bcbc !important;
@@ -121,24 +117,31 @@ st.markdown("""
             box-shadow: 0 4px 12px rgba(0, 188, 188, 0.05) !important;
             text-align: center !important;
         }
-        /* Ocultar el texto nativo 'Drag and drop file here' e íconos molestos de Streamlit */
+        
+        /* Ocultar SOLAMENTE el texto secundario nativo molesto de arrastre, no el del botón */
         [data-testid="stFileUploader"] section > data,
-        [data-testid="stFileUploader"] svg,
-        [data-testid="stFileUploader"] section div {
-            font-size: 0 !important;
-            color: transparent !important;
+        [data-testid="stFileUploader"] section > div > p,
+        [data-testid="stFileUploader"] svg {
+            display: none !important;
         }
-        /* Forzar la visibilidad y diseño del botón gris de examinar archivos original */
+        
+        /* Forzar visibilidad, color y tamaño del texto propio del botón de examinar */
         [data-testid="stFileUploader"] button {
             border-radius: 20px !important;
-            border: 1px solid #00bcbc !important;
-            color: #0b2545 !important;
+            border: 2px solid #00bcbc !important;
+            color: #0b2545 !important; /* Forzamos color oscuro legible */
             background-color: #f7f9fa !important;
-            font-size: 0.9rem !important;
+            font-size: 0.95rem !important;
             font-weight: 600 !important;
-            padding: 0.4rem 1.5rem !important;
+            padding: 0.5rem 2rem !important;
             display: inline-block !important;
-            margin-top: 10px !important;
+            margin: 10px auto !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        [data-testid="stFileUploader"] button * {
+            color: #0b2545 !important; /* Asegura que el texto interno cambie */
+            font-size: 0.95rem !important;
         }
         [data-testid="stFileUploader"] label p {
             color: #0b2545 !important;
