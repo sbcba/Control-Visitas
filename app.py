@@ -39,26 +39,33 @@ if uploaded_file is not None:
             # Cargar calendario oficial de feriados de Argentina
             ar_holidays = holidays.Argentina()
             
-            # 2. SECCIÓN DE FILTROS EN LA BARRA LATERAL (SIDEBAR)
-            st.sidebar.header("🎯 Filtros del Reporte")
+            # 2. SECCIÓN DE FILTROS DENTRO DE UN FORMULARIO (Evita recargas molestas)
+            st.sidebar.header("🎯 Panel de Filtros")
             
-            # Filtro de Tipo de Módulo
+            # Listas de opciones disponibles basadas en el archivo subido
             modulos_disponibles = sorted(list(df_base['TipoModulo'].dropna().unique()))
-            modulos_seleccionados = st.sidebar.multiselect("Seleccioná Tipo de Módulo:", modulos_disponibles, default=modulos_disponibles)
-            
-            # Filtro de Tipo de Profesional
             profesionales_disponibles = sorted(list(df_base['TipoProfesional'].dropna().unique()))
-            # Por defecto pre-seleccionamos todos menos "Medico" para mantener tu criterio previo, pero permitiendo activarlo
             default_prof = [p for p in profesionales_disponibles if p != 'Medico']
-            profesionales_seleccionados = st.sidebar.multiselect("Seleccioná Tipo de Profesional:", profesionales_disponibles, default=default_prof)
+
+            # Creamos el formulario en la barra lateral
+            with st.sidebar.form(key='formulario_filtros'):
+                st.markdown("### Seleccioná tus criterios:")
+                
+                # Desplegables de selección múltiple (tildar/destildar)
+                modulos_seleccionados = st.multiselect("Tipos de Módulo:", modulos_disponibles, default=modulos_disponibles)
+                profesionales_seleccionados = st.multiselect("Tipos de Profesional:", profesionales_disponibles, default=default_prof)
+                
+                st.markdown("---")
+                # Botón de aceptar obligatorio para procesar cambios
+                boton_aceptar = st.form_submit_button(label="✅ Aplicar Filtros")
             
-            # Aplicar filtros dinámicos seleccionados por el usuario
+            # Si el usuario no presionó el botón todavía, usamos las opciones por defecto iniciales
+            # 3. LÓGICA DE PROCESAMIENTO AVANZADO (Horas y Feriados)
             df_filtered = df_base[
                 df_base['TipoModulo'].isin(modulos_seleccionados) & 
                 df_base['TipoProfesional'].isin(profesionales_seleccionados)
             ].copy()
             
-            # 3. LÓGICA DE PROCESAMIENTO AVANZADO (Horas y Feriados)
             Rows_Auditoria = []
             
             for idx, row in df_filtered.iterrows():
@@ -92,16 +99,13 @@ if uploaded_file is not None:
                 # Caso A: ENFERMERO GUARDIA (Se liquida por Horas)
                 if tipo_prof == "Enfermero Guardia":
                     if not pd.isna(minutos) and minutos > 0:
-                        # Cálculo de horas totales con redondeo comercial a 0.5
                         horas_totales = round((minutos / 60.0) * 2) / 2
                         
-                        # Cálculo de horas específicas dentro del día feriado (control de medianoche)
                         if toca_feriado:
                             if start.date() == end.date():
                                 if start.date() in ar_holidays:
                                     horas_feriado = horas_totales
                             else:
-                                # Cruza la medianoche: calcular minutos del Día 1 y Día 2
                                 medianoche = datetime.datetime.combine(start.date() + datetime.timedelta(days=1), datetime.time.min)
                                 min_dia1 = (medianoche - start).total_seconds() / 60.0
                                 min_dia2 = (end - medianoche).total_seconds() / 60.0
@@ -139,7 +143,6 @@ if uploaded_file is not None:
             else:
                 df_audit = pd.DataFrame(Rows_Auditoria)
                 
-                # Agrupamos para colapsar las filas repetidas y sumar los conceptos correctamente
                 summary = df_audit.groupby(
                     ['Paciente', 'TipoModulo', 'PlanCuidado', 'Profesional', 'TipoProfesional']
                 ).agg({
@@ -149,7 +152,6 @@ if uploaded_file is not None:
                     'Horas Feriado Guardia': 'sum'
                 }).reset_index()
                 
-                # Formatear el texto de las horas para que sea amigable en pantalla
                 def format_horas_texto(val):
                     if val == 0: return "-"
                     if val % 1 == 0: return f"{int(val)} hs"
@@ -169,7 +171,6 @@ if uploaded_file is not None:
                 ws.title = "Auditoría de Liquidación"
                 ws.views.sheetView[0].showGridLines = True
                 
-                # Estilos visuales
                 header_fill = PatternFill(start_color="1F4E5B", end_color="1F4E5B", fill_type="solid")
                 header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
                 zebra_fill = PatternFill(start_color="F4F8F9", end_color="F4F8F9", fill_type="solid")
@@ -181,7 +182,7 @@ if uploaded_file is not None:
                 
                 ws['A1'] = "Consolidado de Auditoría, Prestaciones y Liquidación Horas/Visitas"
                 ws['A1'].font = Font(name="Arial", size=14, bold=True, color="1F4E5B")
-                ws['A2'] = f"Generado el: {datetime.datetime.now().strftime('%d/%m/%Y')} - Filtros dinámicos aplicados"
+                ws['A2'] = f"Generado el: {datetime.datetime.now().strftime('%d/%m/%Y')} - Filtros aplicados bajo confirmación"
                 ws['A2'].font = Font(name="Arial", size=9, italic=True, color="666666")
                 
                 headers = [
@@ -198,8 +199,6 @@ if uploaded_file is not None:
                     cell.border = thin_border
                 ws.row_dimensions[4].height = 28
                 
-                # Volcar registros al Excel
-                start_row = 5
                 for idx, row in summary.iterrows():
                     r_idx = start_row + idx
                     ws.cell(row=r_idx, column=1, value=row['Paciente']).alignment = Alignment(horizontal="left")
@@ -208,23 +207,19 @@ if uploaded_file is not None:
                     ws.cell(row=r_idx, column=4, value=row['Profesional']).alignment = Alignment(horizontal="left")
                     ws.cell(row=r_idx, column=5, value=row['TipoProfesional']).alignment = Alignment(horizontal="left")
                     
-                    # Visitas comunes y feriado (números)
                     v_com = ws.cell(row=r_idx, column=6, value=int(row['Visitas Comunes']))
                     v_fer = ws.cell(row=r_idx, column=7, value=int(row['Visitas Feriado']))
                     v_com.number_format = '#,##0'
                     v_fer.number_format = '#,##0'
                     
-                    # Horas totales y feriado guardia (números)
                     h_tot = ws.cell(row=r_idx, column=8, value=float(row['Horas Totales Guardia']))
                     h_fer = ws.cell(row=r_idx, column=9, value=float(row['Horas Feriado Guardia']))
                     h_tot.number_format = '#,##0.0'
                     h_fer.number_format = '#,##0.0'
                     
-                    # Formatos de alineación de números
                     for c_num in [6, 7, 8, 9]:
                         ws.cell(row=r_idx, column=c_num).alignment = Alignment(horizontal="right")
                     
-                    # Color de fondo inteligente: si registra movimiento en feriado, pintar
                     if row['Visitas Feriado'] > 0 or row['Horas Feriado Guardia'] > 0:
                         row_fill = feriado_alerta_fill
                     else:
@@ -238,14 +233,12 @@ if uploaded_file is not None:
                         
                     ws.row_dimensions[r_idx].height = 18
                 
-                # Fila de Totales
                 tot_row = start_row + len(summary)
                 ws.cell(row=tot_row, column=1, value="Total General").font = Font(name="Arial", size=9, bold=True)
                 ws.cell(row=tot_row, column=1).border = thin_border
                 for c_empty in range(2, 6):
                     ws.cell(row=tot_row, column=c_empty).border = thin_border
                     
-                # Sumas automáticas
                 col_letters = ['F', 'G', 'H', 'I']
                 for col_let in col_letters:
                     c_idx_f = headers.index(headers[5 + col_letters.index(col_let)]) + 1
@@ -259,7 +252,6 @@ if uploaded_file is not None:
                 
                 ws.freeze_panes = "A5"
                 
-                # Ajuste de ancho de columnas
                 for col in ws.columns:
                     max_len = 0
                     col_letter = get_column_letter(col[0].column)
