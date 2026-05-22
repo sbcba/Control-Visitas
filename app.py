@@ -10,7 +10,7 @@ import holidays
 # Configuración de la página web
 st.set_page_config(page_title="Auditoría Avanzada de Visitas", page_icon="⚙️", layout="wide")
 
-st.title("⚙️ Sistema Avanzado de Auditoría y Liquidación Asistencial")
+st.title("⚙️ Sistema de Liquidación Asistencial")
 st.markdown("Cargá el reporte mensual completo. Seleccioná los filtros en la barra lateral y presioná **Aplicar Filtros** para ver los resultados.")
 
 # Inicializar el estado del botón si no existe (arranca en Falso para no mostrar nada)
