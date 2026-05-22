@@ -91,7 +91,7 @@ if uploaded_file is not None:
                 
                 # Caso A: ENFERMERO GUARDIA (Se liquida por Horas)
                 if tipo_prof == "Enfermero Guardia":
-                    if not pd.isna(minutos) and minutes > 0:
+                    if not pd.isna(minutos) and minutos > 0:
                         # Cálculo de horas totales con redondeo comercial a 0.5
                         horas_totales = round((minutos / 60.0) * 2) / 2
                         
@@ -214,7 +214,7 @@ if uploaded_file is not None:
                     v_com.number_format = '#,##0'
                     v_fer.number_format = '#,##0'
                     
-                    # Horas totales y feriado guardia (números con decimales para permitir sumas directas en Excel)
+                    # Horas totales y feriado guardia (números)
                     h_tot = ws.cell(row=r_idx, column=8, value=float(row['Horas Totales Guardia']))
                     h_fer = ws.cell(row=r_idx, column=9, value=float(row['Horas Feriado Guardia']))
                     h_tot.number_format = '#,##0.0'
@@ -224,7 +224,7 @@ if uploaded_file is not None:
                     for c_num in [6, 7, 8, 9]:
                         ws.cell(row=r_idx, column=c_num).alignment = Alignment(horizontal="right")
                     
-                    # Color de fondo inteligente: si registra movimiento en feriado (visitas o horas), pintar sutilmente
+                    # Color de fondo inteligente: si registra movimiento en feriado, pintar
                     if row['Visitas Feriado'] > 0 or row['Horas Feriado Guardia'] > 0:
                         row_fill = feriado_alerta_fill
                     else:
@@ -245,11 +245,9 @@ if uploaded_file is not None:
                 for c_empty in range(2, 6):
                     ws.cell(row=tot_row, column=c_empty).border = thin_border
                     
-                # Sumas automáticas para las columnas numéricas
+                # Sumas automáticas
                 col_letters = ['F', 'G', 'H', 'I']
                 for col_let in col_letters:
-                    t_cell = ws.cell(row=tot_row, column=get_column_letter(headers.index(headers[col_letters.index(col_let)+5])+1))
-                    # Buscamos el índice correcto de la columna para la fórmula
                     c_idx_f = headers.index(headers[5 + col_letters.index(col_let)]) + 1
                     res_cell = ws.cell(row=tot_row, column=c_idx_f, value=f"=SUM({col_let}5:{col_let}{tot_row-1})")
                     res_cell.font = Font(name="Arial", size=9, bold=True)
