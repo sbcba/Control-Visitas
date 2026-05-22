@@ -10,17 +10,17 @@ import holidays
 # 1. Configuración de la página
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS AVANZADO (Estética Conhecta, Caja Centrada y Botón 100% Funcional)
+# 2. INYECCIÓN DE CSS AVANZADO (Estética Conhecta, Contraste y Corrección del Uploader)
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght=400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
         
         /* Aplicar tipografía global */
         * {
             font-family: 'Montserrat', sans-serif !important;
         }
         
-        /* Imagen de fondo de Conhecta */
+        /* Imagen de fondo institucional de Conhecta */
         .stApp {
             background-image: url('https://www.conhecta.com.ar/static/media/Medicos.181e2e2026ed6ef17823.jpg');
             background-size: cover;
@@ -39,7 +39,7 @@ st.markdown("""
             backdrop-filter: blur(6px);
         }
 
-        /* Barra lateral FIJA a la izquierda */
+        /* Personalización de la barra lateral FIJA a la izquierda */
         [data-testid="stSidebar"] {
             background-color: rgba(11, 37, 69, 0.98) !important;
             box-shadow: 4px 0 15px rgba(0,0,0,0.2);
@@ -107,42 +107,40 @@ st.markdown("""
             margin-bottom: 1rem;
         }
         
-        /* SOLUCIÓN INTEGRAL PARA LA CAJA DE CARGA CENTRADA Y FUNCIONAL */
+        /* REPARACIÓN DEL CONTENEDOR UPLOAD (Alineación e instrucciones claras) */
         [data-testid="stFileUploader"] {
             background-color: #ffffff !important;
             border: 2px dashed #00bcbc !important;
             border-radius: 12px !important;
             padding: 2.5rem !important;
             box-shadow: 0 4px 12px rgba(0, 188, 188, 0.05) !important;
-            text-align: center !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
         }
         
-        /* Centrar la etiqueta principal */
+        /* Centrado estricto de las etiquetas superiores */
         [data-testid="stFileUploader"] label {
-            justify-content: center !important;
             text-align: center !important;
+            justify-content: center !important;
             width: 100% !important;
+            margin-bottom: 10px !important;
         }
         [data-testid="stFileUploader"] label p {
             color: #0b2545 !important;
             font-weight: 600 !important;
             font-size: 1.1rem !important;
-            text-align: center !important;
-            width: 100% !important;
         }
         
-        /* Ocultar de manera limpia los textos fantasmas en inglés y el ícono de nube nativo */
+        /* Ocultar de forma segura los textos cruzados nativos 'drag and drop' e íconos */
         [data-testid="stFileUploader"] section > data,
         [data-testid="stFileUploader"] section div p,
         [data-testid="stFileUploader"] svg {
             display: none !important;
         }
         
-        /* Estilizar el botón nativo real para que mantenga el clic pero luzca como queremos */
+        /* ESTILIZADO DE BOTÓN INTERNO LIMPIO (Evita la superposición eliminando el pseudo-elemento previo) */
         [data-testid="stFileUploader"] button {
             background-color: #f7f9fa !important;
             color: #0b2545 !important;
@@ -151,31 +149,15 @@ st.markdown("""
             font-size: 0.95rem !important;
             font-weight: 600 !important;
             padding: 0.5rem 2.5rem !important;
-            margin: 15px auto 0 auto !important;
-            display: inline-block !important;
+            margin: 10px auto 0 auto !important;
             box-shadow: 0 2px 8px rgba(0, 188, 188, 0.1) !important;
             transition: all 0.2s ease !important;
         }
         
-        /* Cambiar el texto nativo del botón a español de forma limpia */
-        [data-testid="stFileUploader"] button span::after {
-            content: "Seleccionar Reporte Mensual" !important;
-            font-size: 0.95rem !important;
-            color: #0b2545 !important;
-            font-weight: 600 !important;
-        }
-        /* Ocultar el pedacito de texto original del botón (Browse files) */
-        [data-testid="stFileUploader"] button span {
-            font-size: 0 !important;
-            color: transparent !important;
-        }
-        
-        /* Efecto hover sobre el botón real */
+        /* Efecto hover sobre el botón de examinar */
         [data-testid="stFileUploader"] button:hover {
             background-color: #00bcbc !important;
             border-color: #00bcbc !important;
-        }
-        [data-testid="stFileUploader"] button:hover span::after {
             color: white !important;
         }
         
@@ -249,7 +231,6 @@ with st.sidebar.form(key='formulario_filtros_laterales'):
 
 # 5. ÁREA CENTRAL DE CARGA DE ARCHIVOS
 st.markdown('<div class="titulo-seccion">📂 Carga de Datos Asistenciales</div>', unsafe_allow_html=True)
-# El file_uploader nativo ahora adopta nuestro CSS funcional de forma perfecta
 uploaded_file = st.file_uploader("Arrastrá o seleccioná el reporte mensual completo (.xlsx o .csv)", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
