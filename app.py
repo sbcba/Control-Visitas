@@ -10,7 +10,7 @@ import holidays
 # 1. Configuración de la página
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS AVANZADO (Fondo exacto de Conhecta, barra lateral fija y alto contraste)
+# 2. INYECCIÓN DE CSS AVANZADO (Corrección de errores visuales y contraste premium)
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
@@ -30,7 +30,7 @@ st.markdown("""
         
         /* Capa de legibilidad para el contenido central */
         .block-container {
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(255, 255, 255, 0.96);
             padding: 2.5rem !important;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(11, 37, 69, 0.15);
@@ -41,24 +41,51 @@ st.markdown("""
 
         /* Personalización de la barra lateral FIJA a la izquierda */
         [data-testid="stSidebar"] {
-            background-color: rgba(11, 37, 69, 0.96) !important;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.15);
+            background-color: rgba(11, 37, 69, 0.98) !important;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
             backdrop-filter: blur(4px);
         }
+        
+        /* OOCULTAR EL TEXTO DEL ÍCONO NATIVO CORRUPTO (keyboard_double_arrow_left) */
+        [data-testid="stSidebar"] button svg, 
+        [data-testid="stSidebar"] button {
+            color: white !important;
+        }
+        [data-testid="stSidebarCollapseButton"] {
+            display: none !important; /* Oculta el botón corrupto de la flecha superior */
+        }
+        
         [data-testid="stSidebar"] h2, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label p {
             color: #FFFFFF !important;
             font-weight: 600 !important;
         }
         
-        /* Ajuste de los selectores múltiples dentro de la barra lateral (Alto Contraste) */
+        /* SOLUCIÓN AL COLOR DEL TEXTO EN LOS DESPLEGABLES (Alto Contraste e Inicio Vacío) */
         div[data-baseweb="select"] {
             background-color: #ffffff !important;
             border: 2px solid #00bcbc !important;
             border-radius: 8px !important;
         }
-        div[data-baseweb="popover"] div {
+        
+        /* Forzar color oscuro en los textos seleccionados e internos de los inputs del sidebar */
+        div[data-baseweb="select"] div[data-id="select_container"] {
             color: #0b2545 !important;
+            font-weight: 600 !important;
         }
+        
+        /* Corregir el texto que no se veía cuando la lista desplegable estaba en blanco (Placeholder) */
+        div[data-baseweb="select"] [aria-live="polite"] {
+            color: #555555 !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Forzar que las opciones del menú desplegable al abrirse sean oscuras y legibles */
+        ul[role="listbox"] li {
+            color: #0b2545 !important;
+            font-weight: 500 !important;
+        }
+        
+        /* Píldoras de selección (Tags) en Turquesa Conhecta */
         span[data-baseweb="tag"] {
             background-color: #00bcbc !important;
             color: white !important;
@@ -96,18 +123,36 @@ st.markdown("""
             margin-bottom: 1rem;
         }
         
-        /* DISEÑO DE LA CAJA DE UPLOAD (File Uploader) */
+        /* CORRECCIÓN INTEGRAL DE LA CAJA DE UPLOAD (Evita desbordes de texto) */
         [data-testid="stFileUploader"] {
             background-color: #ffffff !important;
             border: 2px dashed #00bcbc !important;
             border-radius: 12px !important;
-            padding: 1.5rem !important;
+            padding: 2rem !important;
             box-shadow: 0 4px 12px rgba(0, 188, 188, 0.05) !important;
+            display: block !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+        [data-testid="stFileUploader"] section {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
         }
         [data-testid="stFileUploader"] label p {
             color: #0b2545 !important;
             font-weight: 600 !important;
             font-size: 1.1rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        /* Ajuste estético del botón interno gris de examinar archivos */
+        [data-testid="stFileUploader"] button {
+            border-radius: 20px !important;
+            border: 1px solid #00bcbc !important;
+            color: #0b2545 !important;
+            background-color: #f7f9fa !important;
+            font-weight: 500 !important;
         }
         
         /* Botón de envío de formulario (Aplicar filtros en el sidebar) */
@@ -142,6 +187,12 @@ st.markdown("""
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 188, 188, 0.4) !important;
         }
+        
+        form[key="formulario_filtros_laterales"] {
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -164,7 +215,6 @@ PROFESIONALES_SISTEMA = ["Enfermero", "Enfermero Guardia", "Kinesiólogo", "Nutr
 st.sidebar.markdown("## 🔍 Criterios de Selección")
 
 with st.sidebar.form(key='formulario_filtros_laterales'):
-    # CORREGIDO: Se usa st.multiselect puro dentro del bloque with st.sidebar
     modulos_seleccionados = st.multiselect("Tipos de Módulo:", MODULOS_SISTEMA, default=[])
     profesionales_seleccionados = st.multiselect("Especialidades a Auditar:", PROFESIONALES_SISTEMA, default=[])
     
@@ -188,7 +238,6 @@ if uploaded_file is not None:
         if not all(col in df.columns for col in columnas_requeridas):
             st.error("⚠️ Estructura incorrecta. Asegurate de subir el reporte de visitas completo con los encabezados originales del sistema.")
         else:
-            # Si las listas están vacías o no se presionó el botón todavía, pedir configuración inicial
             if not st.session_state.filtros_aplicados or (len(modulos_seleccionados) == 0 and len(profesionales_seleccionados) == 0):
                 st.info("💡 **Configuración inicial requerida:** Seleccioná al menos un módulo o especialidad en el panel fijo de la izquierda y presioná **'Aplicar Filtros Operativos'** para procesar los datos de este archivo.")
             else:
@@ -199,7 +248,7 @@ if uploaded_file is not None:
                 
                 ar_holidays = holidays.Argentina()
                 
-                # Filtrado por las selecciones dinámicas del usuario
+                # Filtrado por las selecciones del usuario
                 df_filtered = df_base[
                     df_base['TipoModulo'].isin(modulos_seleccionados) & 
                     df_base['TipoProfesional'].isin(profesionales_seleccionados)
@@ -403,4 +452,3 @@ if uploaded_file is not None:
                 
     except Exception as e:
         st.error(f"Error general de procesamiento: {e}")
-    
