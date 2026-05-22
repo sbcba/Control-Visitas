@@ -7,69 +7,129 @@ import io
 import datetime
 import holidays
 
-# Configuración de la página web
-st.set_page_config(page_title="Auditoría Avanzada de Visitas", page_icon="⚙️", layout="wide")
+# 1. Configuración de la página web (Forzamos tema claro y diseño ancho)
+st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-st.title("⚙️ Sistema de Liquidación Asistencial")
-st.markdown("Cargá el reporte mensual completo. Seleccioná los filtros en la barra lateral y presioná **Aplicar Filtros** para ver los resultados.")
+# 2. INYECCIÓN DE CSS PERSONALIZADO (Estilo Conhecta)
+st.markdown("""
+    <style>
+        /* Importar tipografía moderna */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+        
+        * {
+            font-family: 'Montserrat', sans-serif !important;
+        }
+        
+        # .stApp {
+            background-color: #FFFFFF;
+        }
+        
+        /* Personalización de la barra lateral (Sidebar) */
+        [data-testid="stSidebar"] {
+            background-color: #134074 !important; /* Azul marino Conhecta */
+            color: #FFFFFF !important;
+        }
+        [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label {
+            color: #FFFFFF !important;
+        }
+        
+        /* Encabezados principales estilo Banner */
+        .conhecta-header {
+            background: linear-gradient(135deg, #134074 0%, #00A896 100%);
+            padding: 2.5rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,168,150,0.2);
+        }
+        .conhecta-header h1 {
+            color: white !important;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Botones personalizados con el Turquesa Conhecta */
+        div.stButton > button:first-child {
+            background-color: #00A896 !important;
+            color: white !important;
+            border-radius: 25px !important;
+            border: none !important;
+            padding: 0.6rem 2rem !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 168, 150, 0.3);
+        }
+        div.stButton > button:first-child:hover {
+            background-color: #008f7f !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 168, 150, 0.4);
+        }
+        
+        /* Botón del formulario específico */
+        button[data-testid="stFormSubmitButton"] {
+            background-color: #00A896 !important;
+            color: white !important;
+            width: 100%;
+        }
 
-# Inicializar el estado del botón si no existe (arranca en Falso para no mostrar nada)
+        /* Estilo para las alertas e info */
+        .stAlert {
+            border-radius: 10px !important;
+            border-left: 5px solid #00A896 !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# 3. BANNER PRINCIPAL (Simulando la cabecera de Conhecta)
+st.markdown("""
+    <div class="conhecta-header">
+        <h1>🧬 Portal de Auditoría Asistencial</h1>
+        <p>Plataforma inteligente para el control mensual de prestaciones, liquidación de guardias y reportería de feriados.</p>
+    </div>
+""", unsafe_allow_html=True)
+
 if 'filtros_aplicados' not in st.session_state:
     st.session_state.filtros_aplicados = False
 
-# Componente para subir el archivo
-uploaded_file = st.file_uploader("Subí el archivo de Visitas completo (Excel o CSV)", type=["xlsx", "csv"])
+# Área de carga del archivo institucional
+uploaded_file = st.file_uploader("📂 Arrastrá o seleccioná el archivo consolidado mensual (Excel o CSV)", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
     try:
-        # 1. Leer el archivo saltando la fila vacía inicial
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file, skiprows=1)
         else:
             df = pd.read_excel(uploaded_file, skiprows=1)
             
-        # Validar columnas requeridas del Excel completo
         columnas_requeridas = ['EstadoCoordinacion', 'TipoModulo', 'TipoProfesional', 'Profesional', 'Paciente', 'PlanCuidado', 'FechaInicioProF', 'FechaFinProf', 'DuracionMinutosProf']
         if not all(col in df.columns for col in columnas_requeridas):
-            st.error("El archivo no tiene todas las columnas requeridas. Verificá el formato.")
+            st.error("⚠️ El archivo no cuenta con la estructura requerida. Por favor, verificá las columnas del reporte.")
         else:
-            # Filtro base: Solo visitas Liberadas
             df_base = df[df['EstadoCoordinacion'] == 'Liberada'].copy()
             
-            # Convertir fechas a objetos reales de Python
             df_base['FechaInicioProF'] = pd.to_datetime(df_base['FechaInicioProF'], errors='coerce')
             df_base['FechaFinProf'] = pd.to_datetime(df_base['FechaFinProf'], errors='coerce')
             
-            # Cargar calendario oficial de feriados de Argentina
             ar_holidays = holidays.Argentina()
             
-            # 2. SECCIÓN DE FILTROS DENTRO DE UN FORMULARIO (En la barra lateral)
-            st.sidebar.header("🎯 Panel de Filtros")
+            # SIDEBAR ESTILIZADO CON FORMULARIO
+            st.sidebar.markdown("## 🔍 Filtros Operativos")
             
-            # Listas de opciones disponibles basadas en el archivo subido
             modulos_disponibles = sorted(list(df_base['TipoModulo'].dropna().unique()))
             profesionales_disponibles = sorted(list(df_base['TipoProfesional'].dropna().unique()))
             default_prof = [p for p in profesionales_disponibles if p != 'Medico']
 
-            # Creamos el formulario en la barra lateral
             with st.sidebar.form(key='formulario_filtros'):
-                st.markdown("### Seleccioná tus criterios:")
+                modulos_seleccionados = st.multiselect("Filtrar por Módulo:", modulos_disponibles, default=modulos_disponibles)
+                profesionales_seleccionados = st.multiselect("Filtrar por Especialidad:", profesionales_disponibles, default=default_prof)
                 
-                # Desplegables de selección múltiple (tildar/destildar)
-                modulos_seleccionados = st.multiselect("Tipos de Módulo:", modulos_disponibles, default=modulos_disponibles)
-                profesionales_seleccionados = st.multiselect("Tipos de Profesional:", profesionales_disponibles, default=default_prof)
-                
-                st.markdown("---")
-                # Al presionar el botón, cambiamos el estado de la aplicación a True
-                boton_aceptar = st.form_submit_button(label="✅ Aplicar Filtros")
+                boton_aceptar = st.form_submit_button(label="Aplicar Filtros")
                 if boton_aceptar:
                     st.session_state.filtros_aplicados = True
             
-            # 3. CONTROL DE RENDERIZADO: Solo procesar y mostrar si "filtros_aplicados" es True
             if not st.session_state.filtros_aplicados:
-                st.info("💡 Por favor, seleccioná los criterios en la barra lateral de la izquierda y hacé clic en el botón **'Aplicar Filtros'** para procesar la información mensual.")
+                st.info("💡 **Sistema listo para procesar:** Seleccioná las especialidades y módulos en el panel izquierdo y presioná **'Aplicar Filtros'** para generar la liquidación.")
             else:
-                # Aplicar filtros dinámicos seleccionados por el usuario
                 df_filtered = df_base[
                     df_base['TipoModulo'].isin(modulos_seleccionados) & 
                     df_base['TipoProfesional'].isin(profesionales_seleccionados)
@@ -87,25 +147,20 @@ if uploaded_file is not None:
                     start = row['FechaInicioProF']
                     end = row['FechaFinProf']
                     
-                    # Valores por defecto
                     horas_totales = 0.0
                     horas_feriado = 0.0
                     es_feriado_visita = "NO"
                     visitas_comunes = 0
                     visitas_feriado = 0
                     
-                    if pd.isna(start):
-                        continue
-                    if pd.isna(end):
-                        end = start
+                    if pd.isna(start): continue
+                    if pd.isna(end): end = start
                     
-                    # Verificar si el rango toca algún feriado argentino
                     rango_dias = pd.date_range(start=start.date(), end=end.date()).date
                     toca_feriado = any(d in ar_holidays for d in rango_dias)
                     if toca_feriado:
                         es_feriado_visita = "SÍ"
                     
-                    # Caso A: ENFERMERO GUARDIA (Se liquida por Horas)
                     if tipo_prof == "Enfermero Guardia":
                         if not pd.isna(minutos) and minutos > 0:
                             horas_totales = round((minutos / 60.0) * 2) / 2
@@ -120,14 +175,10 @@ if uploaded_file is not None:
                                     min_dia2 = (end - medianoche).total_seconds() / 60.0
                                     
                                     min_feriado = 0.0
-                                    if start.date() in ar_holidays:
-                                        min_feriado += min_dia1
-                                    if end.date() in ar_holidays:
-                                        min_feriado += min_dia2
+                                    if start.date() in ar_holidays: min_feriado += min_dia1
+                                    if end.date() in ar_holidays: min_feriado += min_dia2
                                         
                                     horas_feriado = round((min_feriado / 60.0) * 2) / 2
-                    
-                    # Caso B: OTROS PROFESIONALES (Se liquida por Visita unidad)
                     else:
                         if es_feriado_visita == "SÍ":
                             visitas_feriado = 1
@@ -146,9 +197,8 @@ if uploaded_file is not None:
                         'Horas Feriado Guardia': horas_feriado
                     })
                     
-                # 4. AGRUPACIÓN Y CONSOLIDACIÓN DE RESULTADOS
                 if len(Rows_Auditoria) == 0:
-                    st.warning("No hay registros que coincidan con los filtros seleccionados.")
+                    st.warning("No se encontraron registros activos para la combinación de filtros seleccionada.")
                 else:
                     df_audit = pd.DataFrame(Rows_Auditoria)
                     
@@ -170,29 +220,29 @@ if uploaded_file is not None:
                     summary_view['Horas Totales Guardia'] = summary_view['Horas Totales Guardia'].apply(format_horas_texto)
                     summary_view['Horas Feriado Guardia'] = summary_view['Horas Feriado Guardia'].apply(format_horas_texto)
                     
-                    st.markdown(f"### 📋 Resultados de la Auditoría ({len(summary)} combinaciones encontradas)")
+                    st.markdown(f"### 📊 Consolidado de Auditoría Realizado")
                     st.dataframe(summary_view, use_container_width=True)
                     
-                    # 5. GENERAR EL EXCEL FORMATEADO EN MEMORIA
+                    # GENERACIÓN DE EXCEL (Usamos la misma paleta Conhecta en el archivo exportado)
                     output = io.BytesIO()
                     wb = openpyxl.Workbook()
                     ws = wb.active
-                    ws.title = "Auditoría de Liquidación"
+                    ws.title = "Auditoría Conhecta"
                     ws.views.sheetView[0].showGridLines = True
                     
-                    header_fill = PatternFill(start_color="1F4E5B", end_color="1F4E5B", fill_type="solid")
+                    header_fill = PatternFill(start_color="134074", end_color="134074", fill_type="solid") # Azul Marino Conhecta
                     header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
-                    zebra_fill = PatternFill(start_color="F4F8F9", end_color="F4F8F9", fill_type="solid")
+                    zebra_fill = PatternFill(start_color="F7F9FA", end_color="F7F9FA", fill_type="solid")
                     white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-                    feriado_alerta_fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
+                    feriado_alerta_fill = PatternFill(start_color="E0F2F1", end_color="E0F2F1", fill_type="solid") # Turquesa/Verde muy tenue en vez de amarillo
                     
-                    thin_side = Side(style='thin', color='D3D3D3')
+                    thin_side = Side(style='thin', color='E0E0E0')
                     thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
                     
-                    ws['A1'] = "Consolidado de Auditoría, Prestaciones y Liquidación Horas/Visitas"
-                    ws['A1'].font = Font(name="Arial", size=14, bold=True, color="1F4E5B")
-                    ws['A2'] = f"Generado el: {datetime.datetime.now().strftime('%d/%m/%Y')} - Filtros aplicados bajo confirmación"
-                    ws['A2'].font = Font(name="Arial", size=9, italic=True, color="666666")
+                    ws['A1'] = "Reporte Institucional de Auditoría de Módulos"
+                    ws['A1'].font = Font(name="Arial", size=14, bold=True, color="134074")
+                    ws['A2'] = f"Corte de información procesado bajo lineamientos de validación"
+                    ws['A2'].font = Font(name="Arial", size=9, italic=True, color="555555")
                     
                     headers = [
                         "Paciente", "Módulo", "Plan de Cuidado / Prestación", 
@@ -244,7 +294,7 @@ if uploaded_file is not None:
                         ws.row_dimensions[r_idx].height = 18
                     
                     tot_row = start_row + len(summary)
-                    ws.cell(row=tot_row, column=1, value="Total General").font = Font(name="Arial", size=9, bold=True)
+                    ws.cell(row=tot_row, column=1, value="Total General").font = Font(name="Arial", size=9, bold=True, color="134074")
                     ws.cell(row=tot_row, column=1).border = thin_border
                     for c_empty in range(2, 6):
                         ws.cell(row=tot_row, column=c_empty).border = thin_border
@@ -253,7 +303,7 @@ if uploaded_file is not None:
                     for col_let in col_letters:
                         c_idx_f = headers.index(headers[5 + col_letters.index(col_let)]) + 1
                         res_cell = ws.cell(row=tot_row, column=c_idx_f, value=f"=SUM({col_let}5:{col_let}{tot_row-1})")
-                        res_cell.font = Font(name="Arial", size=9, bold=True)
+                        res_cell.font = Font(name="Arial", size=9, bold=True, color="134074")
                         res_cell.border = thin_border
                         if col_let in ['H', 'I']:
                             res_cell.number_format = '#,##0.0'
@@ -275,11 +325,11 @@ if uploaded_file is not None:
                     
                     st.markdown("---")
                     st.download_button(
-                        label="📥 Descargar Excel de Auditoría Potenciado",
+                        label="📥 Descargar Reporte Institucional",
                         data=processed_data,
-                        file_name="Auditoria_Liquidacion_Avanzada.xlsx",
+                        file_name="Auditoria_Conhecta_Visitas.xlsx",
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 
     except Exception as e:
-        st.error(f"Error general en el procesamiento de columnas: {e}")
+        st.error(f"Error en el procesamiento de columnas: {e}")
