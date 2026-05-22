@@ -41,7 +41,7 @@ st.markdown("""
 
         /* Personalización de la barra lateral FIJA a la izquierda */
         [data-testid="stSidebar"] {
-            background-color: rgba(11, 37, 69, 0.96) !important; /* Azul marino Conhecta con leve transparencia */
+            background-color: rgba(11, 37, 69, 0.96) !important;
             box-shadow: 4px 0 15px rgba(0,0,0,0.15);
             backdrop-filter: blur(4px);
         }
@@ -56,11 +56,9 @@ st.markdown("""
             border: 2px solid #00bcbc !important;
             border-radius: 8px !important;
         }
-        /* Color del texto de las opciones para que sea legible al desplegar */
         div[data-baseweb="popover"] div {
             color: #0b2545 !important;
         }
-        /* Píldoras de selección (Tags) en Turquesa Conhecta */
         span[data-baseweb="tag"] {
             background-color: #00bcbc !important;
             color: white !important;
@@ -144,13 +142,6 @@ st.markdown("""
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 188, 188, 0.4) !important;
         }
-        
-        /* Estilos del formulario lateral */
-        form[key="formulario_filtros_laterales"] {
-            border: none !important;
-            padding: 0 !important;
-            background: transparent !important;
-        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -173,12 +164,12 @@ PROFESIONALES_SISTEMA = ["Enfermero", "Enfermero Guardia", "Kinesiólogo", "Nutr
 st.sidebar.markdown("## 🔍 Criterios de Selección")
 
 with st.sidebar.form(key='formulario_filtros_laterales'):
-    # Inicializados sin opciones por defecto (en blanco) para control manual del usuario
-    modulos_seleccionados = st.sidebar.multiselect("Tipos de Módulo:", MODULOS_SISTEMA, default=[])
-    profesionales_seleccionados = st.sidebar.multiselect("Especialidades a Auditar:", PROFESIONALES_SISTEMA, default=[])
+    # CORREGIDO: Se usa st.multiselect puro dentro del bloque with st.sidebar
+    modulos_seleccionados = st.multiselect("Tipos de Módulo:", MODULOS_SISTEMA, default=[])
+    profesionales_seleccionados = st.multiselect("Especialidades a Auditar:", PROFESIONALES_SISTEMA, default=[])
     
     st.sidebar.markdown("---")
-    boton_aceptar = st.sidebar.form_submit_button(label="✅ Aplicar Filtros Operativos")
+    boton_aceptar = st.form_submit_button(label="✅ Aplicar Filtros Operativos")
     if boton_aceptar:
         st.session_state.filtros_aplicados = True
 
@@ -197,7 +188,7 @@ if uploaded_file is not None:
         if not all(col in df.columns for col in columnas_requeridas):
             st.error("⚠️ Estructura incorrecta. Asegurate de subir el reporte de visitas completo con los encabezados originales del sistema.")
         else:
-            # Control de renderizado: si no hay clics en aceptar o las listas están vacías
+            # Si las listas están vacías o no se presionó el botón todavía, pedir configuración inicial
             if not st.session_state.filtros_aplicados or (len(modulos_seleccionados) == 0 and len(profesionales_seleccionados) == 0):
                 st.info("💡 **Configuración inicial requerida:** Seleccioná al menos un módulo o especialidad en el panel fijo de la izquierda y presioná **'Aplicar Filtros Operativos'** para procesar los datos de este archivo.")
             else:
@@ -412,3 +403,4 @@ if uploaded_file is not None:
                 
     except Exception as e:
         st.error(f"Error general de procesamiento: {e}")
+    
