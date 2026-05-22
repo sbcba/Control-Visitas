@@ -205,8 +205,8 @@ st.markdown("""
 # 3. CABECERA INSTITUCIONAL ESTILO CONHECTA
 st.markdown("""
     <div class="conhecta-banner">
-        <h1>🧬 Portal de Auditoría Asistencial</h1>
-        <p>Gestión inteligente de módulos prestacionales, control de guardias y liquidación automatizada de feriados nacionales.</p>
+        <h1>🧬 Portal de Visitas Asistencial</h1>
+        <p>Gestión inteligente de módulos, control de guardias y liquidación automatizada.</p>
     </div>
 """, unsafe_allow_html=True)
 
