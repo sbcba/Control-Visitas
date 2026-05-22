@@ -10,17 +10,17 @@ import holidays
 # 1. Configuración de la página
 st.set_page_config(page_title="Conhecta - Gestión de Visitas", page_icon="🧬", layout="wide")
 
-# 2. INYECCIÓN DE CSS AVANZADO (Estética Conhecta, Alto Contraste y Ocultación del Uploader Nativo)
+# 2. INYECCIÓN DE CSS AVANZADO (Estética Conhecta, Caja Centrada y Botón 100% Funcional)
 st.markdown("""
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght=400;500;600;700&display=swap');
         
         /* Aplicar tipografía global */
         * {
             font-family: 'Montserrat', sans-serif !important;
         }
         
-        /* Imagen de fondo institucional de Conhecta */
+        /* Imagen de fondo de Conhecta */
         .stApp {
             background-image: url('https://www.conhecta.com.ar/static/media/Medicos.181e2e2026ed6ef17823.jpg');
             background-size: cover;
@@ -39,7 +39,7 @@ st.markdown("""
             backdrop-filter: blur(6px);
         }
 
-        /* Personalización de la barra lateral FIJA a la izquierda */
+        /* Barra lateral FIJA a la izquierda */
         [data-testid="stSidebar"] {
             background-color: rgba(11, 37, 69, 0.98) !important;
             box-shadow: 4px 0 15px rgba(0,0,0,0.2);
@@ -107,7 +107,7 @@ st.markdown("""
             margin-bottom: 1rem;
         }
         
-        /* RECONSTRUCCIÓN ESTÁTICA TOTAL DEL BOTÓN DE UPLOAD (OCULTA EL DE STREAMLIT Y CREA EL NUESTRO) */
+        /* SOLUCIÓN INTEGRAL PARA LA CAJA DE CARGA CENTRADA Y FUNCIONAL */
         [data-testid="stFileUploader"] {
             background-color: #ffffff !important;
             border: 2px dashed #00bcbc !important;
@@ -115,35 +115,68 @@ st.markdown("""
             padding: 2.5rem !important;
             box-shadow: 0 4px 12px rgba(0, 188, 188, 0.05) !important;
             text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
-        /* Ocultar el botón nativo desalineado y todos sus textos cruzados en inglés */
-        [data-testid="stFileUploader"] section {
-            display: none !important;
-        }
-        /* Inyectar un diseño personalizado simulado encima del botón real oculto */
-        [data-testid="stFileUploader"]::after {
-            content: "Seleccionar Reporte Mensual (.xlsx / .csv)";
-            display: inline-block;
-            background-color: #f7f9fa;
-            color: #0b2545;
-            border: 2px solid #00bcbc;
-            border-radius: 20px;
-            padding: 0.5rem 2rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.2s ease;
-        }
-        [data-testid="stFileUploader"]:hover::after {
-            background-color: #00bcbc;
-            color: white;
+        
+        /* Centrar la etiqueta principal */
+        [data-testid="stFileUploader"] label {
+            justify-content: center !important;
+            text-align: center !important;
+            width: 100% !important;
         }
         [data-testid="stFileUploader"] label p {
             color: #0b2545 !important;
             font-weight: 600 !important;
             font-size: 1.1rem !important;
-            display: block !important;
+            text-align: center !important;
+            width: 100% !important;
+        }
+        
+        /* Ocultar de manera limpia los textos fantasmas en inglés y el ícono de nube nativo */
+        [data-testid="stFileUploader"] section > data,
+        [data-testid="stFileUploader"] section div p,
+        [data-testid="stFileUploader"] svg {
+            display: none !important;
+        }
+        
+        /* Estilizar el botón nativo real para que mantenga el clic pero luzca como queremos */
+        [data-testid="stFileUploader"] button {
+            background-color: #f7f9fa !important;
+            color: #0b2545 !important;
+            border: 2px solid #00bcbc !important;
+            border-radius: 20px !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            padding: 0.5rem 2.5rem !important;
+            margin: 15px auto 0 auto !important;
+            display: inline-block !important;
+            box-shadow: 0 2px 8px rgba(0, 188, 188, 0.1) !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        /* Cambiar el texto nativo del botón a español de forma limpia */
+        [data-testid="stFileUploader"] button span::after {
+            content: "Seleccionar Reporte Mensual" !important;
+            font-size: 0.95rem !important;
+            color: #0b2545 !important;
+            font-weight: 600 !important;
+        }
+        /* Ocultar el pedacito de texto original del botón (Browse files) */
+        [data-testid="stFileUploader"] button span {
+            font-size: 0 !important;
+            color: transparent !important;
+        }
+        
+        /* Efecto hover sobre el botón real */
+        [data-testid="stFileUploader"] button:hover {
+            background-color: #00bcbc !important;
+            border-color: #00bcbc !important;
+        }
+        [data-testid="stFileUploader"] button:hover span::after {
+            color: white !important;
         }
         
         /* Botón de envío de formulario */
@@ -216,6 +249,7 @@ with st.sidebar.form(key='formulario_filtros_laterales'):
 
 # 5. ÁREA CENTRAL DE CARGA DE ARCHIVOS
 st.markdown('<div class="titulo-seccion">📂 Carga de Datos Asistenciales</div>', unsafe_allow_html=True)
+# El file_uploader nativo ahora adopta nuestro CSS funcional de forma perfecta
 uploaded_file = st.file_uploader("Arrastrá o seleccioná el reporte mensual completo (.xlsx o .csv)", type=["xlsx", "csv"])
 
 if uploaded_file is not None:
@@ -271,7 +305,6 @@ if uploaded_file is not None:
                     
                     if tipo_prof == "Enfermero Guardia":
                         if not pd.isna(minutos) and minutos > 0:
-                            # CORREGIDO: Redondeo comercial a horas completas fijas (sin medias horas)
                             horas_totales = float(round(minutos / 60.0))
                             
                             if toca_feriado:
@@ -287,7 +320,6 @@ if uploaded_file is not None:
                                     if start.date() in ar_holidays: min_feriado += min_dia1
                                     if end.date() in ar_holidays: min_feriado += min_dia2
                                         
-                                    # CORREGIDO: Redondeo de horas feriadas también a enteros completos
                                     horas_feriado = float(round(min_feriado / 60.0))
                     else:
                         if es_feriado_visita == "SÍ":
@@ -321,7 +353,6 @@ if uploaded_file is not None:
                         'Horas Feriado Guardia': 'sum'
                     }).reset_index()
                     
-                    # Formato amigable de horas enteras para la grilla web
                     def format_horas_texto(val):
                         if val == 0: return "-"
                         return f"{int(val)} hs"
@@ -333,7 +364,7 @@ if uploaded_file is not None:
                     st.markdown('<div class="titulo-seccion">📊 Consolidado de Liquidación Mensual</div>', unsafe_allow_html=True)
                     st.dataframe(summary_view, use_container_width=True)
                     
-                    # 5. GENERACIÓN DEL EXCEL SIN PINTAR FILAS NI CELDAS
+                    # GENERACIÓN DEL EXCEL TOTALMENTE LIMPIO
                     output = io.BytesIO()
                     wb = openpyxl.Workbook()
                     ws = wb.active
@@ -342,8 +373,6 @@ if uploaded_file is not None:
                     
                     header_fill = PatternFill(start_color="0B2545", end_color="0B2545", fill_type="solid")
                     header_font = Font(name="Arial", size=10, bold=True, color="FFFFFF")
-                    
-                    # CORREGIDO: Todo el reporte sale con fondo blanco puro sin pintar feriados ni zebra
                     white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
                     
                     thin_side = Side(style='thin', color='D3D3D3')
@@ -382,7 +411,6 @@ if uploaded_file is not None:
                         v_com.number_format = '#,##0'
                         v_fer.number_format = '#,##0'
                         
-                        # CORREGIDO: Las horas se guardan como enteros en el Excel
                         h_tot = ws.cell(row=r_idx, column=8, value=int(row['Horas Totales Guardia']))
                         h_fer = ws.cell(row=r_idx, column=9, value=int(row['Horas Feriado Guardia']))
                         h_tot.number_format = '#,##0'
@@ -394,7 +422,7 @@ if uploaded_file is not None:
                         for c_idx in range(1, 10):
                             cell = ws.cell(row=r_idx, column=c_idx)
                             cell.font = Font(name="Arial", size=9)
-                            cell.fill = white_fill # Fila completamente blanca
+                            cell.fill = white_fill
                             cell.border = thin_border
                             
                         ws.row_dimensions[r_idx].height = 18
